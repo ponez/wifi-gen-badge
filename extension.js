@@ -108,7 +108,10 @@ export default class WifiGenBadgeExtension extends Extension {
             y_expand: true,
             visible: false,
         });
-        this._wrapper.connectObject('notify::width', () => this._placeBadge(), this);
+        this._wrapper.connectObject(
+            'notify::width', () => this._placeBadge(),
+            'notify::height', () => this._placeBadge(),
+            this);
 
         const index = network.get_children().indexOf(this._icon);
         network.remove_child(this._icon);
@@ -157,11 +160,13 @@ export default class WifiGenBadgeExtension extends Extension {
         this._network = null;
     }
 
-    // Start the badge where the glyph ends, inside the icon's side padding,
-    // so wider text like "6E" grows outward instead of over the arcs.
+    // Pin the badge to the glyph's bottom-right corner rather than the icon
+    // box, since themes pad the box differently. Starting at the glyph's
+    // right edge also lets wider text like "6E" grow away from the arcs.
     _placeBadge() {
         const iconSize = this._icon.get_theme_node().get_length('icon-size');
         this._badge.translation_x = Math.round((this._wrapper.width + iconSize) / 2);
+        this._badge.translation_y = -Math.round((this._wrapper.height - iconSize) / 2);
     }
 
     _syncVisible() {
