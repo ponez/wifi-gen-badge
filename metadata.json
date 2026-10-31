@@ -1,0 +1,8 @@
+{
+  "uuid": "wifi-gen-badge@ponez.github.io",
+  "name": "Wi-Fi Generation Badge",
+  "description": "Shows the Wi-Fi generation (4, 5, 6, 6E, 7) as a small badge on the top bar Wi-Fi icon, the one in the system menu, not a separate indicator.\n\nThe generation comes from the link modulation reported by `iw` (HT, VHT, HE, EHT), so `iw` has to be installed.",
+  "shell-version": ["45", "46", "47", "48", "49", "50"],
+  "url": "https://github.com/ponez/wifi-gen-badge",
+  "version-name": "1.0"
+}
