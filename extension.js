@@ -151,6 +151,7 @@ export default class WifiGenBadgeExtension extends Extension {
         const index = this._network.get_children().indexOf(this._wrapper);
         this._wrapper.remove_child(this._icon);
         this._network.insert_child_at_index(this._icon, index);
+        this._badge.destroy();
         this._wrapper.destroy();
         this._network._syncIndicatorsVisible();
 
