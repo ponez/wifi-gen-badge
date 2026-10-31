@@ -2,7 +2,15 @@
 
 GNOME Shell extension that puts the Wi-Fi generation on the top bar Wi-Fi icon itself, the one in the system menu. No extra indicator.
 
+![badge on the Wi-Fi icon in the top bar](screenshots/panel.png)
+
 Shows `4`, `5`, `6`, `6E` or `7`. Hidden when you're on ethernet or not connected.
+
+![badge for each Wi-Fi generation](screenshots/generations.png)
+
+It rides along with the stock signal icon, whatever the strength.
+
+![badge at each signal strength](screenshots/signal.png)
 
 ## How it works
 
