@@ -39,4 +39,4 @@ GNOME Shell 45 to 50. It hooks into the shell's network indicator internals, so 
 
 ## License
 
-GPL-2.0
+GPL-2.0-or-later

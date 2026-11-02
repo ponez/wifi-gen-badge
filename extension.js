@@ -1,3 +1,5 @@
+// SPDX-License-Identifier: GPL-2.0-or-later
+
 import Clutter from 'gi://Clutter';
 import Gio from 'gi://Gio';
 import GLib from 'gi://GLib';
@@ -6,8 +8,6 @@ import St from 'gi://St';
 
 import {Extension} from 'resource:///org/gnome/shell/extensions/extension.js';
 import * as Main from 'resource:///org/gnome/shell/ui/main.js';
-
-Gio._promisify(Gio.Subprocess.prototype, 'communicate_utf8_async');
 
 const POLL_SECONDS = 30;
 const WAIT_MS = 500;
@@ -34,6 +34,19 @@ function parseGeneration(iwLinkOutput) {
     return generation;
 }
 
+function readStdout(proc, cancellable) {
+    return new Promise((resolve, reject) => {
+        proc.communicate_utf8_async(null, cancellable, (_proc, result) => {
+            try {
+                const [, stdout] = proc.communicate_utf8_finish(result);
+                resolve(stdout ?? '');
+            } catch (e) {
+                reject(e);
+            }
+        });
+    });
+}
+
 function badgeText(generation, frequencyMhz) {
     if (!generation)
         return '';
@@ -49,6 +62,8 @@ export default class WifiGenBadgeExtension extends Extension {
         if (this._tryAttach())
             return;
 
+        if (this._waitId)
+            GLib.Source.remove(this._waitId);
         this._waitId = GLib.timeout_add(GLib.PRIORITY_DEFAULT, WAIT_MS, () => {
             if (this._tryAttach() || ++this._waitTries >= WAIT_TRIES) {
                 this._waitId = 0;
@@ -74,6 +89,9 @@ export default class WifiGenBadgeExtension extends Extension {
 
         if (this._wrapper)
             this._detach();
+
+        this._refreshQueued = false;
+        this._loggedError = false;
     }
 
     // The quick settings indicators are created asynchronously, so the
@@ -139,6 +157,8 @@ export default class WifiGenBadgeExtension extends Extension {
             this._refresh();
         });
 
+        if (this._pollId)
+            GLib.Source.remove(this._pollId);
         this._pollId = GLib.timeout_add_seconds(GLib.PRIORITY_DEFAULT, POLL_SECONDS, () => {
             this._refresh();
             return GLib.SOURCE_CONTINUE;
@@ -218,7 +238,7 @@ export default class WifiGenBadgeExtension extends Extension {
         const proc = Gio.Subprocess.new(
             ['iw', 'dev', device.get_iface(), 'link'],
             Gio.SubprocessFlags.STDOUT_PIPE | Gio.SubprocessFlags.STDERR_SILENCE);
-        const [stdout] = await proc.communicate_utf8_async(null, this._cancellable);
-        return badgeText(parseGeneration(stdout ?? ''), accessPoint.frequency);
+        const stdout = await readStdout(proc, this._cancellable);
+        return badgeText(parseGeneration(stdout), accessPoint.frequency);
     }
 }
